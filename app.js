@@ -1,97 +1,75 @@
-// import the data from data.js
+// from data.js
 const tableData = data;
 
-// Reference the HTML table using d3
+// get table references
 var tbody = d3.select("tbody");
 
-// Takes two numbers and adds them
-function addition(a, b) {
-    return a + b;
-  }
+function buildTable(data) {
+  // First, clear out any existing data
+  tbody.html("");
 
-  // Functions can call other functions
-function doubleAddition(c, d) {
-    var total = addition(c, d) * 2;
-    return total;
-  }
+  // Next, loop through each object in the data
+  // and append a row and cells for each value in the row
+  data.forEach((dataRow) => {
+    // Append a row to the table body
+    let row = tbody.append("tr");
 
-  // Original doubleAddition function
-function doubleAddition(c, d) {
-    var total = addition(c, d) * 2;
-    return total;
-  }
-//   into fat arrow function
-doubleAddition = (c, d) => addition(c, d) * 2;
-// 11.4.1
-let friends = ["Sarah", "Greg", "Cindy", "Jeff"];
-
-function listLoop(userList) {
-    for (var i = 0; i < userList.length; i++) {
-      console.log(userList[i]);
-    }
- }
-
- var vegetables = ["Carrots", "Peas", "Lettuce", "Tomatoes"];
-
-for (var i = 0; i < vegetables.length; i++) {
-    console.log("I love " + vegetables[i]);
+    // Loop through each field in the dataRow and add
+    // each value as a table cell (td)
+    Object.values(dataRow).forEach((val) => {
+      let cell = row.append("td");
+      cell.text(val);
+    });
+  });
 }
 
-for (var i = 0; i < 5; i++) {
-    console.log("I am " + i);
- }
+// 1. Create a variable to keep track of all the filters as an object.
+var filters = {};
 
- function buildTable(data) {
-    // First, clear out any existing data
-    tbody.html("");
-  
-    // Next, loop through each object in the data
-    // and append a row and cells for each value in the row
-    data.forEach((dataRow) => {
-      // Append a row to the table body
-      let row = tbody.append("tr");
-  
-      // Loop through each field in the dataRow and add
-      // each value as a table cell (td)
-      Object.values(dataRow).forEach((val) => {
-        let cell = row.append("td");
-        cell.text(val);
-        }
-      );
-    });
-  }
+// 3. Use this function to update the filters. 
+function updateFilters() {
 
-  {
-    datetime: "1/1/2010",
-    city: "benton",
-    state: "ar",
-    country: "us",
-    shape: "circle",
-    durationMinutes: "5 mins.",
-    comments: "4 bright green circles high in the sky going in circles then one bright green light at my front door."
-  },
+    // 4a. Save the element that was changed as a variable.
+    let element = d3.select(this);
+    // 4b. Save the value that was changed as a variable.
+    let elementValue -= element.property("value");
+    console.log(elementValue);
+    // 4c. Save the id of the filter that was changed as a variable.
+    let elementId = element.attr('id');
+    console.log(elemntId);
   
-  function handleClick() {
-    // Grab the datetime value from the filter
-    let date = d3.select("#datetime").property("value");
-    let filteredData = tableData;
-  
-     // Check to see if a date was entered and filter the
-    // data using that date.
-    if (date) {
-      // Apply `filter` to the table data to only keep the
-      // rows where the `datetime` value matches the filter value
-      filteredData = filteredData.filter(row => row.datetime === date);
+    // 5. If a filter value was entered then add that filterId and value
+    // to the filters list. Otherwise, clear that filter from the filters object.
+    if (elementValue) {
+      filters[elementId] = elementValue;
+    }
+    else {
+      delete filters[elementId]
     }
   
-     // Rebuild the table using the filtered data
-    // @NOTE: If no date was entered, then filteredData will
-    // just be the original tableData.
+    // 6. Call function to apply all filters and rebuild the table
+    filterTable();
+  
+  }
+  
+  // 7. Use this function to filter the table when data is entered.
+  function filterTable() {
+  
+    // 8. Set the filtered data to the tableData.
+    let filterData = tableData;
+  
+    // 9. Loop through all of the filters and keep any data that
+    // matches the filter values
+    Object.entries(filters).forEach(([key, value])+> { 
+      filteredData = filteredData.filter(row=> row[key] === value);
+    });
+  
+    // 10. Finally, rebuild the table using the filtered data
     buildTable(filteredData);
   }
   
-  // Attach an event to listen for the form button
-  d3.selectAll("#filter-btn").on("click", handleClick);
+  // 2. Attach an event to listen for changes to each filter
+  d3.selectAll("input").on("change", updateFilters);
   
   // Build the table when the page loads
   buildTable(tableData);
